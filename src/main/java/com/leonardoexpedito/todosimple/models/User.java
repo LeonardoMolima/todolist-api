@@ -1,5 +1,6 @@
 package com.leonardoexpedito.todosimple.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
@@ -73,8 +74,9 @@ public class User {
         this.password = password;
     }
 
+    @JsonIgnore
     public List<Task> getTasks() {
-        return tasks;
+        return this.tasks;
     }
 
     public void setTasks(List<Task> tasks) {
