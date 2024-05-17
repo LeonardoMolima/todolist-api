@@ -1,16 +1,9 @@
 package com.leonardoexpedito.todosimple.controllers;
 
-import com.leonardoexpedito.todosimple.models.Task;
-import com.leonardoexpedito.todosimple.services.TaskService;
+import com.leonardoexpedito.todosimple.repositories.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import javax.validation.Valid;
-import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/task")
@@ -18,8 +11,9 @@ import java.util.List;
 public class TaskController {
 
     @Autowired
-    private TaskService taskService;
+    private TaskRepository taskRepository;
 
+    /*
     @GetMapping("/{id}")
     public ResponseEntity<Task> findById(@PathVariable Long id){
         Task obj = this.taskService.findById(id);
@@ -53,4 +47,6 @@ public class TaskController {
         this.taskService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+     */
 }

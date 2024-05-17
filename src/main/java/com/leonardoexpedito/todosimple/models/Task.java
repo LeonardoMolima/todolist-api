@@ -1,8 +1,7 @@
 package com.leonardoexpedito.todosimple.models;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Objects;
 
@@ -21,8 +20,7 @@ public class Task {
     private User user;
 
     @Column(name = "description", length = 255, nullable = false)
-    @NotNull
-    @NotEmpty
+    @NotBlank
     @Size(min = 1, max = 255)
     private String description;
 
