@@ -1,9 +1,24 @@
 package com.leonardoexpedito.todosimple.controllers;
 
+import com.leonardoexpedito.todosimple.dto.TaskGetDTO;
+import com.leonardoexpedito.todosimple.dto.TaskPostDTO;
+import com.leonardoexpedito.todosimple.dto.TaskPutDTO;
+import com.leonardoexpedito.todosimple.dto.UserGetDTO;
+import com.leonardoexpedito.todosimple.models.Task;
+import com.leonardoexpedito.todosimple.models.User;
 import com.leonardoexpedito.todosimple.repositories.TaskRepository;
+import com.leonardoexpedito.todosimple.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import java.net.URI;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/task")
@@ -13,40 +28,78 @@ public class TaskController {
     @Autowired
     private TaskRepository taskRepository;
 
-    /*
+    @Autowired
+    private UserRepository userRepository;
+
+    @GetMapping
+    public List<TaskGetDTO> findAll(){
+        List<Task> taskList = taskRepository.findAll();
+        return TaskGetDTO.convert(taskList);
+    }
+
+
     @GetMapping("/{id}")
     public ResponseEntity<Task> findById(@PathVariable Long id){
-        Task obj = this.taskService.findById(id);
-        return ResponseEntity.ok().body(obj);
+        ResponseEntity<Task> ret = ResponseEntity.notFound().build();
+        Optional<Task> search = taskRepository.findById(id);
+        if(search.isPresent()){
+            Task objTask = search.get();
+            ret = ResponseEntity.ok(objTask);
+        } else {
+            throw new RuntimeException("Task não encontrada! Id: " + id + ", Tipo: " + Task.class.getName());
+        }
+        return ret;
     }
+
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Task>> findAllByUserId(@PathVariable Long userId) {
-        List<Task> objs = this.taskService.findAllByUserId(userId);
-        return  ResponseEntity.ok().body(objs);
+    public List<TaskGetDTO> findByUserId(@PathVariable Long userId){
+        ResponseEntity<Task> ret = ResponseEntity.notFound().build();
+        List<Task> taskList = taskRepository.findByUser_Id(userId);
+        return TaskGetDTO.convert(taskList);
     }
+
 
     @PostMapping
-    @Validated
-    public ResponseEntity<Void> create(@Valid @RequestBody Task obj){
-        this.taskService.create(obj);
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(obj.getId()).toUri();
-        return ResponseEntity.created(uri).build();
+    @Transactional
+    public ResponseEntity<TaskGetDTO> create(@Valid @RequestBody TaskPostDTO obj, UriComponentsBuilder uriBuilder){
+        ResponseEntity<TaskGetDTO> ret = ResponseEntity.unprocessableEntity().build();
+        Task objTask = obj.convert(userRepository);
+        taskRepository.save(objTask);
+        URI uri = uriBuilder.path("/{id}").buildAndExpand(objTask.getId()).toUri();
+        return ResponseEntity.created(uri).body(new TaskGetDTO(objTask));
     }
 
+
     @PutMapping("/{id}")
-    @Validated
-    public ResponseEntity<Void> update(@Valid @RequestBody Task obj, @PathVariable Long id) {
-        obj.setId(id);
-        this.taskService.update(obj);
-        return ResponseEntity.noContent().build();
+    @Transactional
+    public ResponseEntity<TaskGetDTO> update(@Valid @RequestBody TaskPutDTO obj, @PathVariable("id") Long id, UriComponentsBuilder uriBuilder ) {
+        ResponseEntity<TaskGetDTO> ret = ResponseEntity.notFound().build();
+        Optional<Task> search = taskRepository.findById(id);
+        if(search.isPresent()) {
+            Task objTask = search.get();
+            obj.update(objTask);
+            URI uri = uriBuilder.path("/task/{id}").buildAndExpand(objTask.getId()).toUri();
+            ret = ResponseEntity.created(uri).body(new TaskGetDTO(objTask));
+        } else {
+            throw new RuntimeException("Task não encontrada, Tipo: " + Task.class.getName());
+        }
+        return ret;
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        this.taskService.delete(id);
-        return ResponseEntity.noContent().build();
+    @Transactional
+    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
+        ResponseEntity<Task> ret = ResponseEntity.notFound().build();
+        Optional<Task> search = taskRepository.findById(id);
+        if (search.isPresent()) {
+            Task objTask = search.get();
+            taskRepository.delete(objTask);
+            ret = ResponseEntity.ok().build();
+        } else {
+            throw new RuntimeException("Task não encontrada, Tipo: " + Task.class.getName());
+        }
+        return ret;
     }
 
-     */
 }

@@ -26,18 +26,18 @@ public class UserController {
     private UserRepository userRepository;
 
     @GetMapping
-    public List<UserGetDTO> findAll(){
+    public List<UserGetDTO> findAll() {
         List<User> userList = userRepository.findAll();
         return UserGetDTO.convert(userList);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> findById(@PathVariable Long id){
+    public ResponseEntity<User> findById(@PathVariable Long id) {
         ResponseEntity<User> ret = ResponseEntity.notFound().build();
         Optional<User> search = userRepository.findById(id);
-        if(search.isPresent()) {
-            User item = search.get();
-            ret = ResponseEntity.ok(item);
+        if (search.isPresent()) {
+            User objUser = search.get();
+            ret = ResponseEntity.ok(objUser);
         } else {
             throw new RuntimeException("Usuário não encontrado! Id: " + id + ", Tipo: " + User.class.getName());
         }
@@ -50,7 +50,7 @@ public class UserController {
         ResponseEntity<UserGetDTO> ret = ResponseEntity.unprocessableEntity().build();
         User objUser = obj.convert();
         Optional<User> search = userRepository.findByUsername(objUser.getUsername());
-        if(!search.isPresent()) {
+        if (!search.isPresent()) {
             userRepository.save(objUser);
             URI uri = uriBuilder.path("/{id}").buildAndExpand(objUser.getId()).toUri();
             ret = ResponseEntity.created(uri).body(new UserGetDTO(objUser));
@@ -66,7 +66,7 @@ public class UserController {
     public ResponseEntity<UserGetDTO> update(@Valid @RequestBody UserPutDTO obj, @PathVariable("id") Long id, UriComponentsBuilder uriBuilder) {
         ResponseEntity<UserGetDTO> ret = ResponseEntity.notFound().build();
         Optional<User> search = userRepository.findById(id);
-        if(search.isPresent()){
+        if (search.isPresent()) {
             User objUser = search.get();
             obj.update(objUser);
             URI uri = uriBuilder.path("/user/{id}").buildAndExpand(objUser.getId()).toUri();
@@ -91,4 +91,5 @@ public class UserController {
         }
         return ret;
     }
+
 }
