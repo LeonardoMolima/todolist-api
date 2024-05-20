@@ -1,5 +1,6 @@
 package com.leonardoexpedito.todosimple.dto;
 
+import com.leonardoexpedito.todosimple.enums.RoleEnum;
 import com.leonardoexpedito.todosimple.models.User;
 
 import java.util.List;
@@ -9,6 +10,7 @@ public class UserGetDTO {
     private Long id;
     private String username;
     private String password;
+    private RoleEnum role;
 
     public UserGetDTO() {
     }
@@ -17,6 +19,7 @@ public class UserGetDTO {
         this.id = user.getId();
         this.username = user.getUsername();
         this.password = user.getPassword();
+        this.role = user.getRole();
     }
 
     public Long getId() {
@@ -30,6 +33,7 @@ public class UserGetDTO {
     public String getPassword() {
         return password;
     }
+    public RoleEnum getRole() { return role; }
 
     public static List<UserGetDTO> convert(List<User> userList) {
         return userList.stream().map(UserGetDTO::new).collect(Collectors.toList());

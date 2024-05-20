@@ -7,6 +7,7 @@ import com.leonardoexpedito.todosimple.models.User;
 import com.leonardoexpedito.todosimple.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -24,6 +25,9 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping
     public List<UserGetDTO> findAll() {
@@ -49,8 +53,10 @@ public class UserController {
     public ResponseEntity<UserGetDTO> create(@Valid @RequestBody UserPostDTO obj, UriComponentsBuilder uriBuilder) {
         ResponseEntity<UserGetDTO> ret = ResponseEntity.unprocessableEntity().build();
         User objUser = obj.convert();
-        Optional<User> search = userRepository.findByUsername(objUser.getUsername());
-        if (!search.isPresent()) {
+        User search = userRepository.findByUsername(objUser.getUsername());
+        if (search == null) {
+            var passwordHash = passwordEncoder.encode(objUser.getPassword());
+            objUser.setPassword(passwordHash);
             userRepository.save(objUser);
             URI uri = uriBuilder.path("/{id}").buildAndExpand(objUser.getId()).toUri();
             ret = ResponseEntity.created(uri).body(new UserGetDTO(objUser));
