@@ -6,6 +6,7 @@ import com.leonardoexpedito.todosimple.dto.TaskPutDTO;
 import com.leonardoexpedito.todosimple.models.Task;
 import com.leonardoexpedito.todosimple.repositories.TaskRepository;
 import com.leonardoexpedito.todosimple.repositories.UserRepository;
+import com.leonardoexpedito.todosimple.security.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -28,6 +29,9 @@ public class TaskController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private AuthenticationService authenticationService;
 
     @GetMapping
     public List<TaskGetDTO> findAll(){
@@ -60,9 +64,11 @@ public class TaskController {
 
     @PostMapping
     @Transactional
-    public ResponseEntity<TaskGetDTO> create(@Valid @RequestBody TaskPostDTO obj, UriComponentsBuilder uriBuilder){
+    public ResponseEntity<TaskGetDTO> create(@Valid @RequestBody TaskPostDTO obj, UriComponentsBuilder uriBuilder,@RequestHeader("Authorization") String token){
         ResponseEntity<TaskGetDTO> ret = ResponseEntity.unprocessableEntity().build();
-        Task objTask = obj.convert(userRepository);
+        token = token.replace("Bearer ", "");
+        String username = authenticationService.tokenValidation(token);
+        Task objTask = obj.convert(userRepository, username);
         taskRepository.save(objTask);
         URI uri = uriBuilder.path("/{id}").buildAndExpand(objTask.getId()).toUri();
         return ResponseEntity.created(uri).body(new TaskGetDTO(objTask));

@@ -9,19 +9,8 @@ import javax.validation.constraints.NotBlank;
 import java.util.Optional;
 
 public class TaskPostDTO {
-
-    @UserFK
-    Long user_id;
     @NotBlank
     private String description;
-
-    public Long getUser_id() {
-        return user_id;
-    }
-
-    public void setUser_id(Long user_id) {
-        this.user_id = user_id;
-    }
 
     public String getDescription() {
         return description;
@@ -31,9 +20,9 @@ public class TaskPostDTO {
         this.description = description;
     }
 
-    public Task convert(UserRepository userRepository){
+    public Task convert(UserRepository userRepository, String username){
         Task ret = new Task();
-        Optional<User> search = userRepository.findById(this.user_id);
+        Optional<User> search = Optional.ofNullable(userRepository.findByUsername(username));
         if(search.isPresent()){
             User objUser = search.get();
             ret.setUser(objUser);
