@@ -7,6 +7,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -30,6 +31,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize ->
                         authorize
                                 .mvcMatchers(HttpMethod.POST, "/auth").permitAll()
+                                .mvcMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                                 .mvcMatchers(HttpMethod.GET, "/user").hasRole("ADMIN")
                                 .mvcMatchers(HttpMethod.POST, "/user").hasRole("ADMIN")
                                 .mvcMatchers(HttpMethod.PUT, "/user").hasRole("ADMIN")
@@ -51,6 +53,10 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring().mvcMatchers("/**.html", "/v2/api-docs", "/webjars/**", "/configuration/**", "swagger-resources/**");
     }
 
 }
